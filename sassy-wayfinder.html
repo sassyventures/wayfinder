@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sassy. Wayfinder — Customer Journey Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ultra&family=Questrial&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:    #0c0c0c;
+  --dark:     #111111;
+  --dark2:    #161616;
+  --dark-bdr: rgba(255,255,255,0.08);
+  --orange:   #ff5400;
+  --orange-dim: rgba(255,84,0,0.12);
+  --white:    #FAFAF8;
+  --main-bg:  #F0F0EC;
+  --main-bg2: #E8E8E4;
+  --bdr:      rgba(0,0,0,0.08);
+  --bdr2:     rgba(0,0,0,0.14);
+  --tx:       #0c0c0c;
+  --tx-mid:   #444440;
+  --tx-dim:   rgba(0,0,0,0.38);
+
+  /* channel pill colours */
+  --pill-email-bg:   #fdecea; --pill-email:   #8a2c1c;
+  --pill-slack-bg:   #e3eef9; --pill-slack:   #1a5c99;
+  --pill-inapp-bg:   #eeeafc; --pill-inapp:   #4a2ea0;
+  --pill-sms-bg:     #fef3e2; --pill-sms:     #7a4a0a;
+  --pill-sales-bg:   #e1f5ee; --pill-sales:   #0a5c44;
+  --pill-product-bg: #f0fdf4; --pill-product: #166534;
+  --pill-cs-bg:      #fff7ed; --pill-cs:      #9a3412;
+  --pill-marketing-bg: #f5f0ff; --pill-marketing: #5b21b6;
+}
+
+html, body { height: 100%; font-family: 'Questrial', sans-serif; background: var(--main-bg); color: var(--tx); -webkit-font-smoothing: antialiased; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--black); height: 52px;
+  display: flex; align-items: center; padding: 0 24px; gap: 0;
+  border-bottom: 1px solid rgba(255,84,0,0.1);
+}
+.toolbar-brand { display: flex; align-items: center; gap: 12px; margin-right: 24px; }
+.brand-wordmark { font-family: 'Ultra', serif; font-size: 16px; color: var(--white); }
+.brand-wordmark span { color: var(--orange); }
+.brand-divider { width: 1px; height: 16px; background: var(--dark-bdr); }
+.brand-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+.toolbar-spacer { flex: 1; }
+.toolbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--tx-dim); margin-right: 4px; transition: background 0.3s; flex-shrink: 0; }
+.sync-dot.syncing { background: #e0b881; }
+.sync-dot.saved   { background: var(--orange); }
+.sync-dot.error   { background: #e08181; }
+.sync-label { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.06em; }
+
+.tb-btn {
+  font-family: 'Questrial', sans-serif; font-size: 11px;
+  padding: 5px 14px; border-radius: 2px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid var(--dark-bdr); background: transparent; color: rgba(255,255,255,0.45);
+  transition: all 0.15s;
+}
+.tb-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+.tb-btn-orange { background: var(--orange-dim); color: var(--orange); border-color: rgba(255,84,0,0.3); }
+.tb-btn-orange:hover { background: rgba(255,84,0,0.18); border-color: rgba(255,84,0,0.5); }
+.tb-btn-reset { color: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.06); }
+.tb-btn-reset:hover { border-color: rgba(255,80,80,0.4); color: #ff5050; }
+
+/* ── MAIN ── */
+.main { position: fixed; top: 52px; bottom: 36px; left: 0; right: 0; overflow: auto; }
+
+/* ── STAGE HEADER ── */
+.stage-header-row {
+  display: flex; position: sticky; top: 0; z-index: 50;
+  background: var(--black); border-bottom: 1px solid var(--dark-bdr);
+  min-width: max-content;
+}
+.row-label-stub {
+  width: 120px; flex-shrink: 0; border-right: 1px solid var(--dark-bdr);
+  padding: 12px 16px; display: flex; align-items: center;
+}
+.stage-head-cell {
+  width: 240px; flex-shrink: 0; padding: 10px 16px;
+  border-right: 1px solid var(--dark-bdr);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.stage-head-cell:last-child { border-right: none; }
+.stage-name {
+  font-family: 'Ultra', serif;
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--orange); outline: none; min-width: 60px;
+  border-bottom: 1px solid transparent; padding-bottom: 1px; font-weight: 400;
+}
+.stage-name:focus { border-bottom-color: rgba(255,84,0,0.4); }
+.stage-head-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.head-icon-btn {
+  width: 20px; height: 20px; border-radius: 2px; border: none;
+  background: transparent; cursor: pointer; color: rgba(255,255,255,0.3); font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.12s; line-height: 1;
+}
+.head-icon-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); }
+
+/* ── GRID ── */
+.grid-body { min-width: max-content; }
+.grid-row { display: flex; border-bottom: 1px solid var(--bdr); }
+.grid-row:last-child { border-bottom: none; }
+.row-label {
+  width: 120px; flex-shrink: 0; padding: 14px 16px;
+  border-right: 1px solid var(--bdr2);
+  background: var(--main-bg2); display: flex; align-items: flex-start;
+}
+.row-label span { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tx-dim); }
+.grid-cell {
+  width: 240px; flex-shrink: 0; padding: 10px 12px;
+  border-right: 1px solid var(--bdr); min-height: 72px; background: var(--main-bg);
+}
+.grid-cell:last-child { border-right: none; }
+
+/* ── CARDS ── */
+.card {
+  background: #fff; border: 1px solid var(--bdr2);
+  border-radius: 2px; padding: 8px 10px; margin-bottom: 6px; position: relative;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.card:last-of-type { margin-bottom: 0; }
+.card:hover { border-color: rgba(0,0,0,0.2); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+.card-pill {
+  display: inline-flex; align-items: center; font-size: 10px;
+  padding: 2px 8px; border-radius: 2px; letter-spacing: 0.04em;
+  cursor: pointer; user-select: none; transition: opacity 0.1s, transform 0.1s;
+}
+.card-pill:hover { opacity: 0.75; }
+.card-pill:active { transform: scale(0.95); }
+.pill-row { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; flex-wrap: wrap; }
+
+.pill-email    { background: var(--pill-email-bg);    color: var(--pill-email); }
+.pill-slack    { background: var(--pill-slack-bg);    color: var(--pill-slack); }
+.pill-inapp    { background: var(--pill-inapp-bg);    color: var(--pill-inapp); }
+.pill-sms      { background: var(--pill-sms-bg);      color: var(--pill-sms); }
+.pill-sales    { background: var(--pill-sales-bg);    color: var(--pill-sales); }
+.pill-product  { background: var(--pill-product-bg);  color: var(--pill-product); }
+.pill-cs       { background: var(--pill-cs-bg);       color: var(--pill-cs); }
+.pill-marketing { background: var(--pill-marketing-bg); color: var(--pill-marketing); }
+
+.card-text {
+  font-size: 12px; line-height: 1.5; color: var(--tx);
+  outline: none; min-height: 16px;
+}
+.card-text:empty::before { content: attr(data-ph); color: var(--tx-dim); pointer-events: none; }
+.trigger-text {
+  font-size: 11px; line-height: 1.5; color: var(--tx-mid);
+  outline: none; min-height: 14px; font-style: italic;
+}
+.trigger-text:empty::before { content: attr(data-ph); color: var(--tx-dim); pointer-events: none; font-style: normal; }
+
+.owner-row { display: flex; align-items: center; gap: 8px; }
+.avatar {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; letter-spacing: 0.02em;
+}
+.av-orange  { background: rgba(255,84,0,0.1);  color: var(--orange); }
+.av-blue    { background: var(--pill-slack-bg); color: var(--pill-slack); }
+.av-amber   { background: var(--pill-sms-bg);   color: var(--pill-sms); }
+.av-purple  { background: var(--pill-inapp-bg); color: var(--pill-inapp); }
+.av-green   { background: var(--pill-product-bg); color: var(--pill-product); }
+
+.card-del {
+  position: absolute; top: 5px; right: 5px; width: 16px; height: 16px;
+  border-radius: 50%; border: none; background: transparent;
+  color: var(--tx-dim); cursor: pointer; font-size: 13px;
+  display: none; align-items: center; justify-content: center; line-height: 1;
+}
+.card:hover .card-del { display: flex; }
+.card-del:hover { background: var(--main-bg2); color: var(--tx); }
+
+.add-btn {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 7px;
+  padding: 3px 6px; border-radius: 2px; font-size: 11px; color: var(--tx-dim);
+  cursor: pointer; border: none; background: none; font-family: 'Questrial', sans-serif;
+  transition: all 0.12s; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.add-btn:hover { color: var(--tx-mid); background: var(--main-bg2); }
+
+/* ── SOP LINK ── */
+.card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; min-height: 18px; }
+.sop-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; color: var(--orange); text-decoration: none;
+  background: rgba(255,84,0,0.08); padding: 2px 7px; border-radius: 2px;
+  letter-spacing: 0.03em; transition: opacity 0.12s;
+}
+.sop-link:hover { opacity: 0.75; }
+.link-edit-btn {
+  width: 18px; height: 18px; border-radius: 2px; border: none;
+  background: transparent; cursor: pointer; color: var(--tx-dim);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.12s; margin-left: auto;
+}
+.link-edit-btn:hover { background: var(--main-bg2); color: var(--tx-mid); }
+.link-input-row { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+.link-input-row input {
+  flex: 1; font-family: 'Questrial', sans-serif; font-size: 11px;
+  padding: 4px 8px; border: 1px solid var(--bdr2);
+  border-radius: 2px; outline: none; background: var(--main-bg); color: var(--tx);
+}
+.link-input-row input:focus { border-color: rgba(255,84,0,0.4); }
+.link-save-btn {
+  font-family: 'Questrial', sans-serif; font-size: 10px;
+  padding: 4px 9px; border-radius: 2px; cursor: pointer;
+  background: var(--black); color: var(--orange); border: none; flex-shrink: 0;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.link-save-btn:hover { opacity: 0.85; }
+
+/* ── STATUS BAR ── */
+.statusbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--black); height: 36px;
+  display: flex; align-items: center; padding: 0 24px; gap: 20px;
+  border-top: 1px solid rgba(255,84,0,0.08);
+}
+.stat { display: flex; align-items: baseline; gap: 5px; }
+.stat-num { font-family: 'Ultra', serif; font-size: 14px; color: var(--orange); font-weight: 400; }
+.stat-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+.status-right { margin-left: auto; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.18); }
+
+/* ── LOADING ── */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 300;
+  background: var(--black);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+}
+.loading-screen.hidden { display: none; }
+.loading-wordmark { font-family: 'Ultra', serif; font-size: 18px; color: var(--white); }
+.loading-wordmark span { color: var(--orange); }
+.loading-sub { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-transform: uppercase; }
+.loading-bar { width: 120px; height: 2px; background: rgba(255,84,0,0.15); border-radius: 2px; overflow: hidden; }
+.loading-bar-fill { height: 100%; width: 40%; background: var(--orange); border-radius: 2px; animation: loadpulse 1.2s ease-in-out infinite; }
+@keyframes loadpulse { 0%,100%{opacity:0.4;transform:translateX(-100%)} 50%{opacity:1;transform:translateX(200%)} }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-backdrop.hidden { display: none; }
+.modal { background: #fff; border-radius: 2px; padding: 24px; width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.modal-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tx-dim); margin-bottom: 12px; }
+.modal input {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--bdr2);
+  border-radius: 2px; font-family: 'Questrial', sans-serif; font-size: 14px;
+  color: var(--tx); outline: none; background: var(--main-bg); margin-bottom: 14px;
+}
+.modal input:focus { border-color: rgba(255,84,0,0.4); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-btn {
+  font-family: 'Questrial', sans-serif; font-size: 12px; padding: 7px 16px;
+  border-radius: 2px; cursor: pointer; border: 1px solid var(--bdr2);
+  background: transparent; color: var(--tx-mid); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.modal-btn:hover { background: var(--main-bg2); }
+.modal-btn-primary { background: var(--black); color: var(--orange); border-color: var(--black); }
+.modal-btn-primary:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-wordmark">Sassy<span>.</span></div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-sub">Loading journey map…</div>
+</div>
+
+<!-- TOOLBAR -->
+<header class="toolbar">
+  <div class="toolbar-brand">
+    <div class="brand-wordmark">Sassy<span>.</span></div>
+    <div class="brand-divider"></div>
+    <span class="brand-sub">Wayfinder</span>
+  </div>
+  <div class="toolbar-spacer"></div>
+  <div style="display:flex;align-items:center;gap:6px;margin-right:16px;">
+    <div class="sync-dot" id="syncDot"></div>
+    <span class="sync-label" id="syncLabel">—</span>
+  </div>
+  <div class="toolbar-actions">
+    <button class="tb-btn tb-btn-reset" onclick="resetDemo()">↺ Reset</button>
+    <button class="tb-btn tb-btn-orange" onclick="addStageEnd()">+ Stage</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main" id="main">
+  <div class="stage-header-row" id="stageHeaderRow"></div>
+  <div class="grid-body" id="gridBody"></div>
+</div>
+
+<!-- STATUS BAR -->
+<footer class="statusbar">
+  <div class="stat"><span class="stat-num" id="statStages">0</span><span class="stat-label">stages</span></div>
+  <div class="stat"><span class="stat-num" id="statTouchpoints">0</span><span class="stat-label">touchpoints</span></div>
+  <div class="stat"><span class="stat-num" id="statOwners">0</span><span class="stat-label">owners</span></div>
+  <div class="status-right">Sassy. Wayfinder</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-backdrop hidden" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modalTitle">Add stage</div>
+    <input type="text" id="modalInput" placeholder="Stage name..." onkeydown="modalKey(event)" />
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const TABLE         = 'journey_map';
+const RECORD_KEY    = 'sassy-wayfinder-v1';
+const POLL_INTERVAL = 5000;
+
+let SUPABASE_URL = 'https://cvdjlrfeamjhehydfwtl.supabase.co';
+let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2ZGpscmZlYW1qaGVoeWRmd3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NjAwMjEsImV4cCI6MjA5MTEzNjAyMX0.X_oXA0pDJ_BWNCOmfja32mydjjD9rvajEoVrii-1oxg';
+
+// ── CONSTANTS ──
+const CHANNELS   = ['Email','Slack','In-app','SMS','Sales','Product','CS'];
+const PILL_CLS   = { Email:'pill-email', Slack:'pill-slack', 'In-app':'pill-inapp', SMS:'pill-sms', Sales:'pill-sales', Product:'pill-product', CS:'pill-cs' };
+const AV_COLORS  = ['orange','blue','amber','purple','green'];
+const STAGE_COLORS = ['#ff5400','rgba(255,84,0,0.7)','rgba(255,84,0,0.55)','rgba(255,84,0,0.7)','rgba(255,84,0,0.55)','rgba(255,84,0,0.7)'];
+
+const ROW_DEFS = [
+  { key:'touchpoints', label:'Touchpoint', ph:'Describe touchpoint...', hasPill:true },
+  { key:'messages',    label:'Message',    ph:'Message content...',     hasPill:true },
+  { key:'triggers',    label:'Trigger',    ph:'What triggers this stage?', isTrigger:true },
+  { key:'owners',      label:'Owner',      ph:'Owner / team...',           isOwner:true  },
+];
+
+const DEFAULT_STAGES = [
+  {
+    id:'s0', label:'Awareness',
+    touchpoints:[
+      {id:'tp1',platform:'Email',partner:'',text:'Cold outbound from SDR — personalised by ICP segment'},
+      {id:'tp2',platform:'Marketing',partner:'',text:'Paid search and LinkedIn campaigns targeting RevOps titles'},
+      {id:'tp3',platform:'Product',partner:'',text:'G2 and Capterra review page discovery'},
+    ],
+    messages:[
+      {id:'mp1',platform:'Email',partner:'',text:'"We help RevOps teams cut reporting time by 80%. Worth a look?"'},
+      {id:'mp2',platform:'Email',partner:'',text:'"Orbit for [Company] — 3 things we noticed about your stack"'},
+    ],
+    triggers:[{id:'trp1',text:'Prospect matches ICP — 100–2,000 employee B2B company, RevOps or Product Ops title'}],
+    owners:[{id:'op1',initials:'SD',name:'Sales Dev',color:'orange'},{id:'op2',initials:'MK',name:'Marketing',color:'purple'}]
+  },
+  {
+    id:'s1', label:'Evaluation',
+    touchpoints:[
+      {id:'t1',platform:'In-app',partner:'',text:'Self-serve trial signup — no credit card required'},
+      {id:'t2',platform:'Sales',partner:'',text:'Discovery call with AE — 30 min qualification'},
+      {id:'t3',platform:'Email',partner:'',text:'"Getting started with Orbit" onboarding sequence'},
+    ],
+    messages:[
+      {id:'m1',platform:'Email',partner:'',text:'"Your Orbit trial is ready — here\'s where to start"'},
+      {id:'m2',platform:'In-app',partner:'',text:'Contextual tooltips on first login — guided product tour'},
+    ],
+    triggers:[{id:'tr1',text:'Prospect requests demo OR starts free trial'}],
+    owners:[{id:'o1',initials:'AE',name:'Account Exec',color:'orange'},{id:'o2',initials:'PR',name:'Product',color:'green'}]
+  },
+  {
+    id:'s2', label:'Onboarding',
+    touchpoints:[
+      {id:'t3',platform:'In-app',partner:'',text:'Onboarding checklist — connect data source, build first dashboard'},
+      {id:'t4',platform:'Slack',partner:'',text:'Dedicated Slack channel with CS assigned for first 30 days'},
+      {id:'t5',platform:'Email',partner:'',text:'Day 3 / Day 7 / Day 14 activation nudge emails'},
+    ],
+    messages:[
+      {id:'m3',platform:'Email',partner:'',text:'"You\'re 3 days in — here\'s what your top users do differently"'},
+      {id:'m4',platform:'Slack',partner:'',text:'"Quick win: connect your CRM and see pipeline health in 5 min"'},
+    ],
+    triggers:[{id:'tr2',text:'Contract signed — customer provisioned in system'}],
+    owners:[{id:'o3',initials:'CS',name:'Customer Success',color:'blue'},{id:'o4',initials:'PR',name:'Product',color:'green'}]
+  },
+  {
+    id:'s3', label:'Active Use',
+    touchpoints:[
+      {id:'t6',platform:'In-app',partner:'',text:'Weekly digest email — key metrics and anomalies surfaced'},
+      {id:'t7',platform:'Slack',partner:'',text:'Orbit Slack bot — daily metric summary in team channel'},
+      {id:'t8',platform:'CS',partner:'',text:'Monthly check-in call with CSM'},
+    ],
+    messages:[
+      {id:'m5',platform:'Email',partner:'',text:'"This week in Orbit — 3 things your data is telling you"'},
+      {id:'m6',platform:'In-app',partner:'',text:'Anomaly alert: "Revenue down 12% vs last week — tap to investigate"'},
+    ],
+    triggers:[{id:'tr3',text:'User logs in ≥2 sessions per week for 2 consecutive weeks'}],
+    owners:[{id:'o5',initials:'CS',name:'Customer Success',color:'blue'},{id:'o6',initials:'PR',name:'Product',color:'green'}]
+  },
+  {
+    id:'s4', label:'Expansion',
+    touchpoints:[
+      {id:'t9',platform:'Sales',partner:'',text:'AE outreach — expansion into second team or department'},
+      {id:'t10',platform:'In-app',partner:'',text:'Upsell prompt when seat limit approached'},
+      {id:'t11',platform:'Email',partner:'',text:'"Your team is growing — here\'s how others expand Orbit"'},
+    ],
+    messages:[
+      {id:'m7',platform:'Email',partner:'',text:'"Your ops team loves it — ready to bring in the product team?"'},
+      {id:'m8',platform:'Sales',partner:'',text:'Expansion deck — ROI summary from current usage + new team use cases'},
+    ],
+    triggers:[{id:'tr4',text:'≥3 users active, NPS ≥8, or seat utilisation >80%'}],
+    owners:[{id:'o7',initials:'AE',name:'Account Exec',color:'orange'},{id:'o8',initials:'CS',name:'Customer Success',color:'blue'}]
+  }
+];
+
+// ── STATE ──
+let stages = [];
+const uid = () => 'c' + Math.random().toString(36).slice(2, 10);
+let _typing = false;
+let _typeTimer = null;
+let _lastHash = '';
+let _pollTimer = null;
+
+// ── SUPABASE ──
+function getHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Prefer': 'return=representation',
+  };
+}
+
+async function dbLoad() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${TABLE}?key=eq.${RECORD_KEY}&select=data`,
+    { headers: getHeaders() }
+  );
+  if (!res.ok) throw new Error(`Load failed: ${res.status}`);
+  const rows = await res.json();
+  return rows.length ? rows[0].data : null;
+}
+
+async function dbUpsert(data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`, {
+    method: 'POST',
+    headers: { ...getHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ key: RECORD_KEY, data }),
+  });
+  if (!res.ok) {
+    const msg = await res.text().catch(() => res.status);
+    throw new Error(`Save failed: ${msg}`);
+  }
+}
+
+// ── SYNC ──
+function setSyncState(state, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  dot.className = `sync-dot ${state}`;
+  lbl.textContent = label;
+}
+
+function hash(obj) { return JSON.stringify(obj); }
+
+async function save() {
+  setSyncState('syncing', 'Saving…');
+  try {
+    await dbUpsert(stages);
+    _lastHash = hash(stages);
+    setSyncState('saved', 'Saved');
+    setTimeout(() => setSyncState('', '—'), 2000);
+  } catch(e) {
+    console.error(e);
+    setSyncState('error', 'Error saving');
+  }
+}
+
+function scheduleSave() {
+  _typing = true;
+  clearTimeout(_typeTimer);
+  _typeTimer = setTimeout(async () => {
+    _typing = false;
+    await save();
+  }, 1200);
+}
+
+async function poll() {
+  if (_typing) return;
+  try {
+    const remote = await dbLoad();
+    if (!remote) return;
+    const remoteHash = hash(remote);
+    if (remoteHash !== _lastHash) {
+      stages = remote;
+      _lastHash = remoteHash;
+      render();
+    }
+  } catch(e) { /* silent */ }
+}
+
+// ── RESET ──
+async function resetDemo() {
+  if (!confirm('Reset the journey map back to the original demo data? This cannot be undone.')) return;
+  setSyncState('syncing', 'Resetting…');
+  stages = JSON.parse(JSON.stringify(DEFAULT_STAGES));
+  try {
+    await dbUpsert(stages);
+    _lastHash = hash(stages);
+    setSyncState('saved', 'Reset complete');
+    setTimeout(() => setSyncState('', '—'), 2000);
+    render();
+  } catch(e) {
+    setSyncState('error', 'Reset failed');
+  }
+}
+
+// ── START APP ──
+async function startApp() {
+  try {
+    const remote = await dbLoad();
+    if (remote && Array.isArray(remote) && remote.length) {
+      stages = remote;
+    } else {
+      stages = JSON.parse(JSON.stringify(DEFAULT_STAGES));
+      await dbUpsert(stages);
+    }
+    _lastHash = hash(stages);
+  } catch(e) {
+    console.error('Load error, using defaults:', e);
+    stages = JSON.parse(JSON.stringify(DEFAULT_STAGES));
+  }
+  document.getElementById('loadingScreen').classList.add('hidden');
+  render();
+  _pollTimer = setInterval(poll, POLL_INTERVAL);
+}
+
+// ── BOOT ──
+(async function boot() {
+  await startApp();
+})();
+
+// ── RENDER ──
+function pillClass(p) { return PILL_CLS[p] || 'pill-email'; }
+
+function renderPill(platform, sId, rk, iId) {
+  return `<span class="card-pill ${pillClass(platform)}"
+    onclick="cyclePlatform('${sId}','${rk}','${iId}')"
+    title="Click to change channel">${platform||'—'}</span>`;
+}
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+
+function renderCard(item, sId, rk, rowDef) {
+  if (rowDef.isOwner) {
+    const initials = getInitials(item.name || '');
+    return `<div class="card" data-id="${item.id}" data-stage="${sId}" data-row="${rk}">
+    <button class="card-del" onclick="delCard('${sId}','${rk}','${item.id}')">×</button>
+    <div class="owner-row">
+      <span class="avatar av-${item.color||'orange'}" onclick="cycleOwnerColor('${sId}','${rk}','${item.id}')" title="Click to change colour" style="cursor:pointer;">${initials}</span>
+      <span class="card-text" contenteditable="true" data-ph="Owner / team..." spellcheck="false">${item.name}</span>
+    </div></div>`;
+  }
+
+  if (rowDef.isTrigger) return `<div class="card" data-id="${item.id}" data-stage="${sId}" data-row="${rk}">
+    <button class="card-del" onclick="delCard('${sId}','${rk}','${item.id}')">×</button>
+    <div class="trigger-text" contenteditable="true" data-ph="What triggers this stage?" spellcheck="false">${item.text}</div>
+    </div>`;
+
+  const linkFooter = item.url
+    ? `<div class="card-footer">
+        <a class="sop-link" href="${item.url}" target="_blank" rel="noopener">${item.urlLabel||'Link'} ↗</a>
+        <button class="link-edit-btn" onclick="toggleLinkInput('${item.id}')" title="Edit link">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z"/></svg>
+        </button>
+      </div>
+      <div class="link-input-row" id="linkinput-${item.id}" style="display:none;flex-direction:column;gap:4px;">
+        <input type="text" placeholder="Label (e.g. Playbook, Template...)" value="${item.urlLabel||''}" id="linklabel-${item.id}" style="font-family:'Questrial',sans-serif;font-size:11px;padding:4px 8px;border:1px solid var(--bdr2);border-radius:2px;outline:none;background:var(--main-bg);color:var(--tx);" />
+        <div style="display:flex;gap:4px;">
+          <input type="url" placeholder="https://..." value="${item.url||''}" id="linkval-${item.id}" style="flex:1;font-family:'Questrial',sans-serif;font-size:11px;padding:4px 8px;border:1px solid var(--bdr2);border-radius:2px;outline:none;background:var(--main-bg);color:var(--tx);" onkeydown="if(event.key==='Enter')saveLink('${sId}','${rk}','${item.id}')" />
+          <button class="link-save-btn" onclick="saveLink('${sId}','${rk}','${item.id}')">Save</button>
+          <button class="link-save-btn" style="background:var(--main-bg2);color:var(--tx-mid);" onclick="clearLink('${sId}','${rk}','${item.id}')">Clear</button>
+        </div>
+      </div>`
+    : `<div class="card-footer">
+        <button class="link-edit-btn" onclick="toggleLinkInput('${item.id}')" title="Add link" style="margin-left:0;">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 5l-4 4M4.5 2.5h5v5"/></svg>
+        </button>
+      </div>
+      <div class="link-input-row" id="linkinput-${item.id}" style="display:none;flex-direction:column;gap:4px;">
+        <input type="text" placeholder="Label (e.g. Playbook, Template...)" id="linklabel-${item.id}" style="font-family:'Questrial',sans-serif;font-size:11px;padding:4px 8px;border:1px solid var(--bdr2);border-radius:2px;outline:none;background:var(--main-bg);color:var(--tx);" />
+        <div style="display:flex;gap:4px;">
+          <input type="url" placeholder="https://..." id="linkval-${item.id}" style="flex:1;font-family:'Questrial',sans-serif;font-size:11px;padding:4px 8px;border:1px solid var(--bdr2);border-radius:2px;outline:none;background:var(--main-bg);color:var(--tx);" onkeydown="if(event.key==='Enter')saveLink('${sId}','${rk}','${item.id}')" />
+          <button class="link-save-btn" onclick="saveLink('${sId}','${rk}','${item.id}')">Save</button>
+        </div>
+      </div>`;
+
+  return `<div class="card" data-id="${item.id}" data-stage="${sId}" data-row="${rk}">
+    <button class="card-del" onclick="delCard('${sId}','${rk}','${item.id}')">×</button>
+    <div class="pill-row">${renderPill(item.platform, sId, rk, item.id)}</div>
+    <div class="card-text" contenteditable="true" data-ph="${rowDef.ph}" spellcheck="false">${item.text}</div>
+    ${linkFooter}
+    </div>`;
+}
+
+function renderCell(stage, rowDef) {
+  const items = stage[rowDef.key] || [];
+  const cards = items.map(i => renderCard(i, stage.id, rowDef.key, rowDef)).join('');
+  const label = rowDef.label.toLowerCase();
+  return `<div class="grid-cell" id="cell-${stage.id}-${rowDef.key}">
+    ${cards}
+    <button class="add-btn" onclick="addCard('${stage.id}','${rowDef.key}')">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 1v8M1 5h8"/></svg>
+      ${label}
+    </button></div>`;
+}
+
+function render() {
+  const headerRow = document.getElementById('stageHeaderRow');
+  const body = document.getElementById('gridBody');
+
+  let h = `<div class="row-label-stub"></div>`;
+  stages.forEach((s, idx) => {
+    const col = STAGE_COLORS[idx % STAGE_COLORS.length];
+    const isFirst = idx === 0, isLast = idx === stages.length - 1;
+    h += `<div class="stage-head-cell" id="sh-${s.id}">
+      <span class="stage-name" contenteditable="true" spellcheck="false"
+        style="color:${col};"
+        onblur="renameStage('${s.id}',this.textContent)">${s.label}</span>
+      <div class="stage-head-actions">
+        <button class="head-icon-btn" onclick="moveStage('${s.id}',-1)" ${isFirst?'style="opacity:0.2;pointer-events:none;"':''}>←</button>
+        <button class="head-icon-btn" onclick="moveStage('${s.id}',1)"  ${isLast?'style="opacity:0.2;pointer-events:none;"':''}>→</button>
+        <button class="head-icon-btn" onclick="openInsertModal('${s.id}')" style="font-size:15px;">+</button>
+        <button class="head-icon-btn" onclick="removeStage('${s.id}')" style="font-size:16px;">×</button>
+      </div></div>`;
+  });
+  headerRow.innerHTML = h;
+
+  let rows = '';
+  ROW_DEFS.forEach(row => {
+    const cells = stages.map(s => renderCell(s, row)).join('');
+    rows += `<div class="grid-row">
+      <div class="row-label"><span>${row.label}</span></div>
+      <div style="display:flex;flex:1;">${cells}</div>
+    </div>`;
+  });
+  body.innerHTML = rows;
+
+  body.querySelectorAll('[contenteditable]').forEach(el => {
+    el.addEventListener('input', () => { _typing = true; clearTimeout(_typeTimer); });
+    el.addEventListener('blur', e => { syncDOM(e); scheduleSave(); });
+  });
+
+  updateStats();
+}
+
+// ── DOM SYNC ──
+function syncDOM(e) {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const { id, stage: sId, row } = card.dataset;
+  const s = stages.find(x => x.id === sId);
+  if (!s) return;
+  const item = (s[row]||[]).find(i => i.id === id);
+  if (!item) return;
+  if (row === 'owners') { item.name = e.target.textContent.trim(); }
+  else item.text = e.target.textContent.trim();
+}
+
+// ── MUTATIONS ──
+function cycleOwnerColor(sId, rk, iId) {
+  const s = stages.find(x => x.id === sId);
+  const item = (s[rk]||[]).find(i => i.id === iId);
+  if (!item) return;
+  const idx = AV_COLORS.indexOf(item.color || 'orange');
+  item.color = AV_COLORS[(idx + 1) % AV_COLORS.length];
+  render(); scheduleSave();
+}
+
+function cyclePlatform(sId, rk, iId) {
+  const s = stages.find(x => x.id === sId);
+  const item = (s[rk]||[]).find(i => i.id === iId);
+  if (!item) return;
+  item.platform = CHANNELS[(CHANNELS.indexOf(item.platform) + 1) % CHANNELS.length];
+  render(); scheduleSave();
+}
+
+function toggleLinkInput(itemId) {
+  const row = document.getElementById(`linkinput-${itemId}`);
+  if (!row) return;
+  const visible = row.style.display !== 'none';
+  row.style.display = visible ? 'none' : 'flex';
+  if (!visible) { const inp = document.getElementById(`linkval-${itemId}`); if (inp) inp.focus(); }
+}
+
+function saveLink(sId, rk, iId) {
+  const s = stages.find(x => x.id === sId);
+  const item = (s[rk]||[]).find(i => i.id === iId);
+  if (!item) return;
+  const url   = (document.getElementById(`linkval-${iId}`)?.value || '').trim();
+  const label = (document.getElementById(`linklabel-${iId}`)?.value || '').trim();
+  item.url = url; item.urlLabel = label || 'Link';
+  render(); scheduleSave();
+}
+
+function clearLink(sId, rk, iId) {
+  const s = stages.find(x => x.id === sId);
+  const item = (s[rk]||[]).find(i => i.id === iId);
+  if (!item) return;
+  item.url = '';
+  render(); scheduleSave();
+}
+
+function addCard(sId, rk) {
+  const s = stages.find(x => x.id === sId);
+  if (!s) return;
+  const rowDef = ROW_DEFS.find(r => r.key === rk);
+  let item = { id: uid(), text: '' };
+  if (rowDef.hasPill) { item.platform = 'Email'; item.partner = ''; }
+  if (rowDef.isOwner) item = { id: uid(), initials:'', name:'', color: AV_COLORS[s.owners.length % AV_COLORS.length] };
+  s[rk].push(item);
+  render(); scheduleSave();
+  requestAnimationFrame(() => {
+    const cell = document.getElementById(`cell-${sId}-${rk}`);
+    if (!cell) return;
+    const cards = cell.querySelectorAll('.card');
+    const last = cards[cards.length-1];
+    if (last) { const el = last.querySelector('[contenteditable]'); if (el) el.focus(); }
+  });
+}
+
+function delCard(sId, rk, iId) {
+  const s = stages.find(x => x.id === sId);
+  if (!s) return;
+  s[rk] = (s[rk]||[]).filter(i => i.id !== iId);
+  render(); scheduleSave();
+}
+
+function moveStage(sId, dir) {
+  const idx = stages.findIndex(s => s.id === sId);
+  const n = idx + dir;
+  if (n < 0 || n >= stages.length) return;
+  [stages[idx], stages[n]] = [stages[n], stages[idx]];
+  render(); scheduleSave();
+}
+
+function renameStage(sId, text) {
+  const s = stages.find(x => x.id === sId);
+  if (s && text.trim()) { s.label = text.trim(); scheduleSave(); }
+}
+
+function removeStage(sId) {
+  if (stages.length <= 1) return;
+  const s = stages.find(x => x.id === sId);
+  openModal(`Remove "${s.label}"?`, 'Type REMOVE to confirm', val => {
+    if (val.toUpperCase() === 'REMOVE') {
+      stages = stages.filter(x => x.id !== sId);
+      render(); scheduleSave();
+    }
+  });
+}
+
+// ── MODAL ──
+let _modalCb = null;
+
+function openModal(title, ph, cb) {
+  _modalCb = cb;
+  document.getElementById('modalTitle').textContent = title;
+  const inp = document.getElementById('modalInput');
+  inp.placeholder = ph; inp.value = '';
+  document.getElementById('modalBackdrop').classList.remove('hidden');
+  setTimeout(() => inp.focus(), 50);
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalBackdrop')) return;
+  document.getElementById('modalBackdrop').classList.add('hidden');
+  _modalCb = null;
+}
+
+function confirmModal() {
+  const val = document.getElementById('modalInput').value.trim();
+  if (!val) return;
+  document.getElementById('modalBackdrop').classList.add('hidden');
+  if (_modalCb) _modalCb(val);
+  _modalCb = null;
+}
+
+function modalKey(e) {
+  if (e.key === 'Enter') confirmModal();
+  if (e.key === 'Escape') closeModal();
+}
+
+function openInsertModal(sId) {
+  openModal('Insert stage after', 'Stage name...', label => {
+    const idx = stages.findIndex(s => s.id === sId);
+    stages.splice(idx+1, 0, { id:uid(), label, touchpoints:[], messages:[], triggers:[], owners:[] });
+    render(); scheduleSave();
+  });
+}
+
+function addStageEnd() {
+  openModal('Add stage', 'Stage name...', label => {
+    stages.push({ id:uid(), label, touchpoints:[], messages:[], triggers:[], owners:[] });
+    render(); scheduleSave();
+  });
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('statStages').textContent = stages.length;
+  document.getElementById('statTouchpoints').textContent = stages.reduce((a,s)=>a+(s.touchpoints||[]).length,0);
+  document.getElementById('statOwners').textContent = stages.reduce((a,s)=>a+(s.owners||[]).length,0);
+}
+</script>
+</body>
+</html>
